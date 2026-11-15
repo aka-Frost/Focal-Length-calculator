@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FocalCalc — Focal length converter</title>
+  <meta name="description" content="Convert camera focal lengths to full-frame equivalents and smartphone-style zoom multipliers.">
+  <meta name="theme-color" content="#151618">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+
+    <!-- ============ Header ============ -->
+    <header class="app-header">
+      <div class="brand">
+        <img src="assets/icon.svg" width="34" height="34" alt="">
+        <div>
+          <h1>FocalCalc</h1>
+          <p>Focal length converter</p>
+        </div>
+      </div>
+      <!-- Shown by script.js only when the browser offers an install prompt -->
+      <button id="install-btn" class="btn btn-ghost" type="button" hidden>Install</button>
+    </header>
+
+    <main>
+
+      <!-- ============ Camera settings ============ -->
+      <section class="card" aria-labelledby="camera-heading">
+        <h2 id="camera-heading" class="card-title">Camera</h2>
+
+        <div class="field">
+          <label for="sensor">Sensor</label>
+          <!-- Options are filled in by script.js from the PRESETS list -->
+          <select id="sensor"></select>
+        </div>
+
+        <div class="field" id="custom-crop-field" hidden>
+          <label for="custom-crop">Custom crop factor</label>
+          <input id="custom-crop" type="text" inputmode="decimal" autocomplete="off"
+                 placeholder="e.g. 1.3" aria-describedby="custom-crop-error">
+          <p class="field-error" id="custom-crop-error"></p>
+        </div>
+
+        <div class="field">
+          <label for="reference">1× reference focal length (mm)</label>
+          <input id="reference" type="text" inputmode="decimal" autocomplete="off"
+                 placeholder="24" aria-describedby="reference-hint reference-error">
+          <p class="hint" id="reference-hint">The full-frame focal length that counts as 1× (about 24mm on most phone main cameras).</p>
+          <p class="field-error" id="reference-error"></p>
+        </div>
+      </section>
+
+      <!-- ============ Calculator ============ -->
+      <section class="card" aria-labelledby="calc-heading">
+        <h2 id="calc-heading" class="card-title">Calculate</h2>
+
+        <div class="tabs" role="tablist" aria-label="Calculation mode">
+          <button class="tab" role="tab" type="button" id="tab-single" data-mode="single"
+                  aria-controls="panel-single" aria-selected="true">Single</button>
+          <button class="tab" role="tab" type="button" id="tab-range" data-mode="range"
+                  aria-controls="panel-range" aria-selected="false" tabindex="-1">Range</button>
+          <button class="tab" role="tab" type="button" id="tab-reverse" data-mode="reverse"
+                  aria-controls="panel-reverse" aria-selected="false" tabindex="-1">Reverse</button>
+        </div>
+
+        <!-- ---- Single focal length ---- -->
+        <div role="tabpanel" id="panel-single" aria-labelledby="tab-single">
+          <div class="field">
+            <label for="single-focal">Actual focal length (mm)</label>
+            <input id="single-focal" type="text" inputmode="decimal" autocomplete="off"
+                   placeholder="e.g. 17.5" aria-describedby="single-focal-error">
+            <p class="field-error" id="single-focal-error"></p>
+          </div>
+          <div class="results">
+            <div class="result">
+              <span class="result-label">Full-frame equivalent</span>
+              <span class="result-value" id="single-ff">—</span>
+            </div>
+            <div class="result">
+              <span class="result-label">Zoom multiplier</span>
+              <span class="result-value accent" id="single-zoom">—</span>
+            </div>
+          </div>
+          <p class="working" id="single-working"></p>
+        </div>
+
+        <!-- ---- Focal length range ---- -->
+        <div role="tabpanel" id="panel-range" aria-labelledby="tab-range" hidden>
+          <div class="field-row">
+            <div class="field">
+              <label for="range-min">Shortest (mm)</label>
+              <input id="range-min" type="text" inputmode="decimal" autocomplete="off"
+                     placeholder="16" aria-describedby="range-min-error">
+              <p class="field-error" id="range-min-error"></p>
+            </div>
+            <div class="field">
+              <label for="range-max">Longest (mm)</label>
+              <input id="range-max" type="text" inputmode="decimal" autocomplete="off"
+                     placeholder="50" aria-describedby="range-max-error">
+              <p class="field-error" id="range-max-error"></p>
+            </div>
+          </div>
+          <div class="results">
+            <div class="result">
+              <span class="result-label">Full-frame equivalent</span>
+              <span class="result-value" id="range-ff">—</span>
+            </div>
+            <div class="result">
+              <span class="result-label">Zoom range</span>
+              <span class="result-value accent" id="range-zoom">—</span>
+            </div>
+          </div>
+          <p class="working" id="range-working"></p>
+        </div>
+
+        <!-- ---- Reverse: zoom multiplier → focal length ---- -->
+        <div role="tabpanel" id="panel-reverse" aria-labelledby="tab-reverse" hidden>
+          <div class="field">
+            <label for="rev-zoom">Desired zoom multiplier (×)</label>
+            <input id="rev-zoom" type="text" inputmode="decimal" autocomplete="off"
+                   placeholder="e.g. 3" aria-describedby="rev-zoom-error">
+            <p class="field-error" id="rev-zoom-error"></p>
+            <div class="chips" aria-label="Common zoom multipliers">
+              <button class="chip" type="button" data-zoom="0.5">0.5×</button>
+              <button class="chip" type="button" data-zoom="1">1×</button>
+              <button class="chip" type="button" data-zoom="2">2×</button>
+              <button class="chip" type="button" data-zoom="3">3×</button>
+              <button class="chip" type="button" data-zoom="5">5×</button>
+              <button class="chip" type="button" data-zoom="10">10×</button>
+            </div>
+          </div>
+          <div class="results">
+            <div class="result">
+              <span class="result-label">Full-frame equivalent</span>
+              <span class="result-value" id="rev-ff">—</span>
+            </div>
+            <div class="result">
+              <span class="result-label">Actual focal length needed</span>
+              <span class="result-value accent" id="rev-actual">—</span>
+            </div>
+          </div>
+          <p class="working" id="rev-working"></p>
+        </div>
+
+        <!-- ---- Actions ---- -->
+        <div class="actions">
+          <button id="copy-btn" class="btn btn-primary" type="button" disabled>Copy results</button>
+          <button id="reset-btn" class="btn" type="button">Reset</button>
+        </div>
+        <!-- Screen-reader announcements ("Copied", "Reset") -->
+        <p id="status" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      <p><strong>Full-frame equivalent</strong> = actual focal length × crop factor</p>
+      <p><strong>Zoom</strong> = full-frame equivalent ÷ 1× reference focal length</p>
+      <p>Works offline once loaded.</p>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

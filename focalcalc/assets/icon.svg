@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- FocalCalc icon: a simple lens, drawn to match the PNG icons -->
+  <rect width="512" height="512" rx="96" fill="#1b1c1f"/>
+  <circle cx="256" cy="256" r="159" fill="#3a3c42"/>
+  <circle cx="256" cy="256" r="146" fill="#18191c"/>
+  <circle cx="256" cy="256" r="102" fill="#f0a63c"/>
+  <circle cx="256" cy="256" r="90" fill="#0f1012"/>
+  <circle cx="256" cy="256" r="54" fill="#1e2430"/>
+  <circle cx="233" cy="233" r="15" fill="#cdd6e8" opacity="0.85"/>
+</svg>
